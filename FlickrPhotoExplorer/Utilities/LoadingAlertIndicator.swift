@@ -17,26 +17,12 @@ class LoadingAlertIndicator {
 		loadingIndicator.startAnimating();
 
 		alert.view.addSubview(loadingIndicator)
-		self.getTopViewController()?.present(alert, animated: true, completion: {
-			
-		})
+		Utilities.getTopViewController()?.present(alert, animated: true, completion: nil)
 	}
 	
-	static func hideLoadingAlertIndicator() {
-		if let topVC = self.getTopViewController() as? UIAlertController {
-			topVC.dismiss(animated: true, completion: nil)
+	static func hideLoadingAlertIndicator(completion: (() -> Void)? = nil) {
+		if let topVC = Utilities.getTopViewController() as? UIAlertController {
+			topVC.dismiss(animated: true, completion: completion)
 		}
-	}
-	
-	static func getTopViewController() -> UIViewController? {
-		let keyWindow = UIApplication.shared.windows.filter {$0.isKeyWindow}.first
-
-		if var topController = keyWindow?.rootViewController {
-			while let presentedViewController = topController.presentedViewController {
-				topController = presentedViewController
-			}
-			return topController
-		}
-		return nil
 	}
 }

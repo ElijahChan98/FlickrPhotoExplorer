@@ -56,9 +56,9 @@ class FlickrPhotoDetailsPersistence: NSObject {
 	
 	func save(photoDetails: FlickrPhotoInfo) {
 			let managedContext = CoreDataContainer.shared.persistentContainer.viewContext
-			let entity = NSEntityDescription.entity(forEntityName: "FlickrPhotoDetail", in: managedContext)!
+			let entity = NSEntityDescription.entity(forEntityName: "FlickrPhotoDetailEntity", in: managedContext)!
 			let avatar = NSManagedObject(entity: entity, insertInto: managedContext)
-			let fetchRequest = NSFetchRequest<NSFetchRequestResult>(entityName: "FlickrPhotoDetail")
+			let fetchRequest = NSFetchRequest<NSFetchRequestResult>(entityName: "FlickrPhotoDetailEntity")
 			let predicate = NSPredicate(format: "id = %@", photoDetails.id)
 			fetchRequest.predicate = predicate
 			
@@ -88,43 +88,30 @@ class FlickrPhotoDetailsPersistence: NSObject {
 			}
 		}
 		
-		func update(photoDetails: FlickrPhotoInfo) {
+		func delete(photoDetails: FlickrPhotoInfo) {
 			let managedContext = CoreDataContainer.shared.persistentContainer.viewContext
-			let fetchRequest = NSFetchRequest<NSFetchRequestResult>(entityName: "FlickrPhotoDetail")
+			let fetchRequest = NSFetchRequest<NSFetchRequestResult>(entityName: "FlickrPhotoDetailEntity")
+			
 			let predicate = NSPredicate(format: "id = %@", photoDetails.id)
 			fetchRequest.predicate = predicate
 			
-			let backgroundContext = NSManagedObjectContext(concurrencyType: .privateQueueConcurrencyType)
-			backgroundContext.parent = managedContext
-			
-			backgroundContext.performAndWait {
-				do {
-					let object = try managedContext.fetch(fetchRequest)
-					if object.count == 1
-					{
-						let objectUpdate = object.first as! NSManagedObject
-						objectUpdate.setValue(photoDetails.id, forKey: "id")
-						objectUpdate.setValue(photoDetails.secret, forKey: "secret")
-						objectUpdate.setValue(photoDetails.title, forKey: "title")
-						objectUpdate.setValue(photoDetails.server, forKey: "server")
-						objectUpdate.setValue(photoDetails.owner, forKey: "owner")
-						
-						saveContext(forContext: backgroundContext)
-					}
-				}
-				catch
-				{
-					print(error)
-				}
-				saveContext(forContext: managedContext)
+			let objects = try! managedContext.fetch(fetchRequest)
+			for obj in objects {
+				managedContext.delete(obj as! NSManagedObject)
+			}
+
+			do {
+				try managedContext.save() // <- remember to put this :)
+			} catch {
+				// Do something... fatalerror
 			}
 		}
 		
 		func deleteAllData() {
-			let fetchRequest = NSFetchRequest<NSFetchRequestResult>(entityName: "FlickrPhotoDetail")
+			let fetchRequest = NSFetchRequest<NSFetchRequestResult>(entityName: "FlickrPhotoDetailEntity")
 			let deleteRequest = NSBatchDeleteRequest(fetchRequest: fetchRequest)
 			let persistentContainer = CoreDataContainer.shared.persistentContainer
-
+			
 			do {
 				try persistentContainer.viewContext.execute(deleteRequest)
 			} catch let error as NSError {
@@ -132,11 +119,31 @@ class FlickrPhotoDetailsPersistence: NSObject {
 			}
 
 		}
+	
+	func checkIfPhotoInfoExist(id: String) -> Bool {
+		let managedContext = CoreDataContainer.shared.persistentContainer.viewContext
+		let fetchRequest = NSFetchRequest<NSManagedObject>(entityName: "FlickrPhotoDetailEntity")
+		fetchRequest.fetchLimit =  1
+		let predicate = NSPredicate(format: "id = %@", id)
+		fetchRequest.predicate = predicate
 		
-		func retrieveUsersFromCache(completion: @escaping (_ success: Bool, _ users: [FlickrPhotoInfo]) -> ()) {
+		do {
+			let count = try managedContext.count(for: fetchRequest)
+			if count > 0 {
+				return true
+			}else {
+				return false
+			}
+		}catch let error as NSError {
+			print("Could not fetch. \(error), \(error.userInfo)")
+			return false
+		}
+	}
+		
+		func retrievePhotoInfosFromCache(completion: @escaping (_ success: Bool, _ photoInfos: [FlickrPhotoInfo]) -> ()) {
 			let managedContext = CoreDataContainer.shared.persistentContainer.viewContext
 			
-			let fetchRequest = NSFetchRequest<NSManagedObject>(entityName: "FlickrPhotoDetail")
+			let fetchRequest = NSFetchRequest<NSManagedObject>(entityName: "FlickrPhotoDetailEntity")
 			do {
 				let managedUsers = try managedContext.fetch(fetchRequest)
 				var photoDetails: [FlickrPhotoInfo] = []
@@ -148,13 +155,6 @@ class FlickrPhotoDetailsPersistence: NSObject {
 					photoDetail.server = managedUser.value(forKeyPath: "server") as! String
 					photoDetail.owner = managedUser.value(forKeyPath: "owner") as! String
 					
-					if let cachedImage = self.loadImageFromCache(key: "\(photoDetail.id ?? "-1")") {
-						photoDetail.image = cachedImage
-						//user.state = .downloaded
-					} 
-					else {
-						//user.state = .new
-					}
 					if photoDetail.id != "-1" {
 						photoDetails.append(photoDetail)
 					}

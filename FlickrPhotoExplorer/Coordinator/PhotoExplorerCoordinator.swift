@@ -34,4 +34,9 @@ class PhotoSearchCoordinator: Coordinator, PhotoSearchDelegate {
 		let photoListCoordinator = PhotoListCoordinator(navigationController: self.navigationController, searchTags: tags)
 		photoListCoordinator.start()
 	}
+	
+	func openFavorites() {
+		let photoListCoordinator = PhotoListCoordinator(navigationController: self.navigationController)
+		photoListCoordinator.start()
+	}
 }

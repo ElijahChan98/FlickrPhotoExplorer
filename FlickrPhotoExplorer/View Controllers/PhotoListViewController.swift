@@ -33,20 +33,30 @@ class PhotoListViewController: UIViewController, PhotoListViewModelDelegate {
 		self.tableView.register(UITableViewCell.self, forCellReuseIdentifier: "cell")
 		
 		self.viewModel.delegate = self
-		
-		self.viewModel.fetchData()
-		LoadingAlertIndicator.showLoadingAlertIndicator()
     }
 	
-	func reloadData(indexPathsToReload: [IndexPath]?) {
-		guard let indexPathsToReload = indexPathsToReload else {
-			LoadingAlertIndicator.hideLoadingAlertIndicator()
-			self.tableView.reloadData()
-			return
+	override func viewWillAppear(_ animated: Bool) {
+		self.viewModel.fetchData()
+	}
+	
+	func reloadData(_ reloadResult: ReloadResult<Any>) {
+		LoadingAlertIndicator.hideLoadingAlertIndicator()
+		switch reloadResult {
+		case .success(let indexPathsToReload):
+			guard let indexPathsToReload = indexPathsToReload else {
+				self.tableView.reloadData()
+				return
+			}
+			
+			let newIndexPathsToReload = self.visibleIndexPathsToReload(intersecting: indexPathsToReload)
+			self.tableView.reloadRows(at: newIndexPathsToReload, with: .automatic)
+		case .failure(let error):
+			self.delegate?.showErrorMessage(error: error)
 		}
-		
-		let newIndexPathsToReload = visibleIndexPathsToReload(intersecting: indexPathsToReload)
-		self.tableView.reloadRows(at: newIndexPathsToReload, with: .automatic)
+	}
+	
+	func showLoadingAlert() {
+		LoadingAlertIndicator.showLoadingAlertIndicator()
 	}
 	
 }
@@ -100,4 +110,5 @@ extension PhotoListViewController {
 
 protocol PhotoListDelegate: AnyObject {
 	func cellSelected(photoId: String)
+	func showErrorMessage(error: FlickrError?)
 }

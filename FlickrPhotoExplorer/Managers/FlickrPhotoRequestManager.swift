@@ -13,28 +13,39 @@ public enum RequestMethod: String {
 	case get = "GET"
 }
 
+public enum FlickrResult<T> {
+	case success(T?)
+	case failure(FlickrError?)
+}
+
 class FlickrPhotoRequestManager {
 	static let shared = FlickrPhotoRequestManager()
 	
-	func fetchPhotosWithTags(tags: [String], page: Int, completion: @escaping (_ success: Bool, _ response: [String:Any]?) -> ()) {
+	func fetchPhotosWithTags(tags: [String], page: Int, completion: @escaping (FlickrResult<Any>) -> ()) {
 		var urlComponents = URLComponents(string: Constants.BASE_URL + Constants.SERVICES_REST)!
-		let commaSeparatedTags = tags.joined(separator: ",")
-		let queryItems = [
-			URLQueryItem(name: "method", value: Constants.SEARCH),
+		var queryItems = [
 			URLQueryItem(name: "api_key", value: Constants.API_KEY),
-			URLQueryItem(name: "tags", value: commaSeparatedTags),
-			URLQueryItem(name: "per_page", value: String(25)),
 			URLQueryItem(name: "page", value: String(page)),
 			URLQueryItem(name: "format", value: "json"),
 			URLQueryItem(name: "nojsoncallback", value: "1"),
 		]
+		let commaSeparatedTags = tags.joined(separator: ",")
+		if commaSeparatedTags != "" {
+			let commaSeparatedTags = tags.joined(separator: ",")
+			queryItems.append(URLQueryItem(name: "method", value: Constants.SEARCH))
+			queryItems.append(URLQueryItem(name: "tags", value: commaSeparatedTags))
+		}
+		else {
+			queryItems.append(URLQueryItem(name: "method", value: Constants.GET_RECENT))
+		}
+		
 		urlComponents.queryItems = queryItems
-		self.createGenericRequest(url: urlComponents.url!, requestMethod: .get) { (success, response) in
-			completion(success, response)
+		self.createGenericRequest(url: urlComponents.url!, requestMethod: .get) { result in
+			completion(result)
 		}
 	}
 	
-	func fetchPhotoDetails(photoId: String, completion: @escaping (_ success: Bool, _ response: [String:Any]?) -> ()) {
+	func fetchPhotoDetails(photoId: String, completion: @escaping (FlickrResult<Any>) -> ()) {
 		var urlComponents = URLComponents(string: Constants.BASE_URL + Constants.SERVICES_REST)!
 		let queryItems = [
 			URLQueryItem(name: "method", value: Constants.GET_INFO),
@@ -44,12 +55,12 @@ class FlickrPhotoRequestManager {
 			URLQueryItem(name: "nojsoncallback", value: "1"),
 		]
 		urlComponents.queryItems = queryItems
-		self.createGenericRequest(url: urlComponents.url!, requestMethod: .get) { (success, response) in
-			completion(success, response)
+		self.createGenericRequest(url: urlComponents.url!, requestMethod: .get) { result in
+			completion(result)
 		}
 	}
 	
-	private func createGenericRequest(url: URL, requestMethod: RequestMethod, completion: @escaping (_ success: Bool, _ response: [String: Any]?) -> ()) {
+	private func createGenericRequest(url: URL, requestMethod: RequestMethod, completion: @escaping (FlickrResult<Any>) -> ()) {
 		let session = URLSession.shared
 		var request = URLRequest(url: url)
 		request.httpMethod = requestMethod.rawValue
@@ -58,11 +69,11 @@ class FlickrPhotoRequestManager {
 			DispatchQueue.main.async {
 				if let httpResponse = response as? HTTPURLResponse {
 					if httpResponse.statusCode == 401 {
-						completion(false, nil)
+						completion(.failure(nil))
 					}
 					else if httpResponse.statusCode == 500 {
 						//internal server error
-						completion(false, nil)
+						completion(.failure(nil))
 					}
 				}
 				
@@ -70,21 +81,21 @@ class FlickrPhotoRequestManager {
 					do {
 						let json = try JSONSerialization.jsonObject(with: data, options: [])
 						if let payload = json as? [String: Any] {
-							completion(true, payload)
-						}
-						else if let payloads = json as? [[String:Any]] {
-							//print(payloads)
-							completion(true, ["payloads" : payloads])
+							if let error: FlickrError = CodableObjectFactory.objectFromPayload(payload) {
+								completion(.failure(error))
+							}
+							else {
+								completion(.success(payload))
+							}
 						}
 					}
 					catch {
 						print(String(describing: error))
 						print(error.localizedDescription)
-						print("something went wrong")
 					}
 				}
 				else {
-					completion(false, nil)
+					completion(.failure(nil))
 				}
 			}
 		}

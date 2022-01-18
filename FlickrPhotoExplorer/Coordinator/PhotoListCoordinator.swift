@@ -17,6 +17,11 @@ class PhotoListCoordinator: Coordinator, PhotoListDelegate {
 		self.navigationController = navigationController
 	}
 	
+	init(navigationController: UINavigationController) {
+		self.viewModel = PhotoListViewModel()
+		self.navigationController = navigationController
+	}
+	
 	func start() {
 		let vc = PhotoListViewController(viewModel: viewModel)
 		vc.delegate = self
@@ -35,5 +40,17 @@ class PhotoListCoordinator: Coordinator, PhotoListDelegate {
 	func cellSelected(photoId: String) {
 		let coordinator = PhotoDetailsCoordinator(navigationController: self.navigationController, photoId: photoId)
 		coordinator.start()
+	}
+	
+	func showErrorMessage(error: FlickrError?) {
+		let message = error?.message ?? Constants.SOMETHING_WENT_WRONG
+		let okAlert = UIAlertController(title: "", message: message, preferredStyle: .alert)
+		let okAction = UIAlertAction(title: "Okay", style: .default) { alert in
+			self.navigationController.popViewController(animated: true)
+			self.childDidFinish(self)
+		}
+		okAlert.addAction(okAction)
+		
+		self.navigationController.present(okAlert, animated: true, completion: nil)
 	}
 }

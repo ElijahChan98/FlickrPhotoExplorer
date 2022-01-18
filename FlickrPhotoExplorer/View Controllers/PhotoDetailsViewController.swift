@@ -7,6 +7,11 @@
 
 import UIKit
 
+private enum ButtonState {
+	case favorite
+	case unfavorite
+}
+
 class PhotoDetailsViewController: UIViewController, PhotoDetailsViewModelDelegate {
 	@IBOutlet weak var containingStackView: UIStackView!
 	
@@ -15,7 +20,19 @@ class PhotoDetailsViewController: UIViewController, PhotoDetailsViewModelDelegat
 	@IBOutlet weak var authorLabel: UILabel!
 	@IBOutlet weak var descLabel: UILabel!
 	@IBOutlet weak var locationLabel: UILabel!
-	@IBOutlet weak var dateLabel: UILabel!
+	
+	private var favoriteButton: UIBarButtonItem!
+	private var state: ButtonState!
+	private var buttonImage: UIImage {
+		var image: UIImage!
+		switch state {
+		case .favorite:
+			image = UIImage(named: "filledheart")
+		case .unfavorite, .none:
+			image = UIImage(named: "unfilledheart")
+		}
+		return image
+	}
 	
 	var viewModel: PhotoDetailsViewModel!
 	
@@ -31,27 +48,51 @@ class PhotoDetailsViewController: UIViewController, PhotoDetailsViewModelDelegat
     override func viewDidLoad() {
         super.viewDidLoad()
 		self.hideBackButtonText()
-		
+		setupFavoriteButton()
 		LoadingAlertIndicator.showLoadingAlertIndicator()
     }
 	
+	func setupFavoriteButton() {
+		if viewModel.imageInfoExists() {
+			self.state = .favorite
+		}
+		else {
+			self.state = .unfavorite
+		}
+		self.favoriteButton = UIBarButtonItem(image: buttonImage, style: .plain, target: self, action: #selector(addToFavorites))
+		navigationItem.rightBarButtonItem = self.favoriteButton
+	}
+	
+	@objc func addToFavorites() {
+		switch state {
+		case .favorite:
+			self.state = .unfavorite
+			viewModel.deleteImageInfo()
+		case .unfavorite, .none:
+			self.state = .favorite
+			viewModel.saveImageInfo()
+		}
+		navigationItem.rightBarButtonItem?.image = buttonImage
+	}
+	
 	func reloadData() {
+		LoadingAlertIndicator.hideLoadingAlertIndicator()
 		let photoDetails = viewModel.photoDetails
 		
 		self.titleLabel.text = photoDetails?.title.content
 		self.authorLabel.text = "By: \(photoDetails?.owner.username ?? "unknown")"
 		self.descLabel.text = photoDetails?.description.content
-		self.locationLabel.text = photoDetails?.owner.location
+		if let location = photoDetails?.owner.location {
+			self.locationLabel.text = "Location: \(location)"
+		}
 		
 		let readableDate = Dates.readableValue(photoDetails?.dates.posted ?? "")
-		self.dateLabel.text = "Date Posted: \(readableDate)"
+		self.title = readableDate
 		
 		let url = photoDetails?.getUrlForPhoto(size: .normal)
 		self.imageView.loadImage(url: url!)
 		
 		removeEmptyViews()
-		
-		LoadingAlertIndicator.hideLoadingAlertIndicator()
 	}
 	
 	func removeEmptyViews() {

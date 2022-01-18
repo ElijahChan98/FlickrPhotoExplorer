@@ -13,6 +13,7 @@ class PhotoSearchViewController: UIViewController {
 	
     override func viewDidLoad() {
         super.viewDidLoad()
+		self.hideBackButtonText()
         // Do any additional setup after loading the view.
     }
 	
@@ -25,11 +26,21 @@ class PhotoSearchViewController: UIViewController {
 	}
 
 	@IBAction func onSearchButtonClick(_ sender: Any) {
-		let tags = searchTextField.text?.components(separatedBy: " ") ?? []
-		self.delegate?.search(tags: tags)
+		if let searchText = searchTextField.text {
+			let tags = searchText.components(separatedBy: " ")
+			self.delegate?.search(tags: tags)
+		}
+		else {
+			self.delegate?.search(tags: [])
+		}
+	}
+	
+	@IBAction func onViewFavoritesButtonClick(_ sender: Any) {
+		self.delegate?.openFavorites()
 	}
 }
 
 protocol PhotoSearchDelegate: AnyObject {
 	func search(tags: [String])
+	func openFavorites()
 }

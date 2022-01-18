@@ -7,10 +7,17 @@
 
 import Foundation
 
+public enum ReloadResult<T> {
+	case success([IndexPath]?)
+	case failure(FlickrError?)
+}
+
 class PhotoListViewModel {
 	var title: String!
 	var searchTags: [String]!
 	var delegate: PhotoListViewModelDelegate?
+	
+	private var hasExistingData: Bool!
 	
 	private var isFetchInProgress: Bool = false
 	
@@ -25,27 +32,60 @@ class PhotoListViewModel {
 	
 	init(searchTags: [String]) {
 		let searchText = searchTags.joined(separator: ", ")
-		let title = "Search results for \(searchText)"
-		self.title = title
+		if searchText == "" {
+			self.title = "Recent Uploads"
+		}
+		else {
+			self.title = "Search results for \(searchText)"
+		}
 		self.searchTags = searchTags
+		self.hasExistingData = false
+	}
+	
+	init() {
+		self.title = "Favorites"
+		self.hasExistingData = true
 	}
 	
 	func fetchData() {
+		if hasExistingData {
+			self.fetchExistingData()
+		}
+		else {
+			self.delegate?.showLoadingAlert()
+			self.fetchAPIData()
+		}
+	}
+	
+	private func fetchExistingData() {
+		FlickrPhotoDetailsPersistence.shared.retrievePhotoInfosFromCache { success, photoInfos in
+			self.flickrPhotoInfos = photoInfos
+			self.total = photoInfos.count
+			self.delegate?.reloadData(.success(.none))
+		}
+	}
+	
+	private func fetchAPIData() {
 		guard isFetchInProgress == false else { return }
 		isFetchInProgress = true
 		
-		FlickrPhotoRequestManager.shared.fetchPhotosWithTags(tags: searchTags, page: self.currentPage) { success, response in
+		FlickrPhotoRequestManager.shared.fetchPhotosWithTags(tags: searchTags, page: self.currentPage) { result in
 			DispatchQueue.main.async {
-				if success == true {
-					if let response = response {
-						self.currentPage += 1
+				switch result {
+				case .success(let response):
+					guard let response = response as? [String: Any] else {
 						self.isFetchInProgress = false
-						
-						self.getFlickrPhotoDetailsFromResponse(response)
+						return
 					}
-				}
-				else {
+					self.currentPage += 1
+					self.isFetchInProgress = false
+					
+					self.getFlickrPhotoDetailsFromResponse(response)
+				case .failure(let error):
 					//handle errors
+					if let error = error {
+						self.delegate?.reloadData(.failure(error))
+					}
 					self.isFetchInProgress = false
 				}
 			}
@@ -64,10 +104,10 @@ class PhotoListViewModel {
 				
 				if flickrResponse.page > 1 {
 					let indexPathsToReload = self.indexPathsToReload(newPhotoInfos: newInfos)
-					self.delegate?.reloadData(indexPathsToReload: indexPathsToReload)
+					self.delegate?.reloadData(.success(indexPathsToReload))
 				}
 				else {
-					self.delegate?.reloadData(indexPathsToReload: .none)
+					self.delegate?.reloadData(.success(.none))
 				}
 			}
 		}
@@ -84,5 +124,6 @@ class PhotoListViewModel {
 }
 
 protocol PhotoListViewModelDelegate {
-	func reloadData(indexPathsToReload: [IndexPath]?)
+	func showLoadingAlert()
+	func reloadData(_ reloadResult: ReloadResult<Any>)
 }
