@@ -30,6 +30,8 @@ class PhotoDetailsViewController: UIViewController, PhotoDetailsViewModelDelegat
 	
     override func viewDidLoad() {
         super.viewDidLoad()
+		self.hideBackButtonText()
+		
 		LoadingAlertIndicator.showLoadingAlertIndicator()
     }
 	

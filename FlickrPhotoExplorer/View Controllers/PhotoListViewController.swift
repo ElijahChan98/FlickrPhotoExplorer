@@ -24,47 +24,77 @@ class PhotoListViewController: UIViewController, PhotoListViewModelDelegate {
 	
     override func viewDidLoad() {
         super.viewDidLoad()
+		self.hideBackButtonText()
+		
 		self.title = viewModel.title
 		self.tableView.delegate = self
 		self.tableView.dataSource = self
+		self.tableView.prefetchDataSource = self
 		self.tableView.register(UITableViewCell.self, forCellReuseIdentifier: "cell")
 		
 		self.viewModel.delegate = self
 		
+		self.viewModel.fetchData()
 		LoadingAlertIndicator.showLoadingAlertIndicator()
     }
 	
-	func reloadData() {
-		LoadingAlertIndicator.hideLoadingAlertIndicator()
-		self.tableView.reloadData()
+	func reloadData(indexPathsToReload: [IndexPath]?) {
+		guard let indexPathsToReload = indexPathsToReload else {
+			LoadingAlertIndicator.hideLoadingAlertIndicator()
+			self.tableView.reloadData()
+			return
+		}
+		
+		let newIndexPathsToReload = visibleIndexPathsToReload(intersecting: indexPathsToReload)
+		self.tableView.reloadRows(at: newIndexPathsToReload, with: .automatic)
 	}
 	
 }
 
-extension PhotoListViewController: UITableViewDelegate, UITableViewDataSource {
+extension PhotoListViewController: UITableViewDelegate, UITableViewDataSource, UITableViewDataSourcePrefetching {
 	func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-		return viewModel.flickrResponse?.infos?.count ?? 0
+		return viewModel.total
 	}
 	
 	func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
 		let cell = tableView.dequeueReusableCell(withIdentifier: "cell", for: indexPath)
-
-		guard let photo = viewModel.flickrResponse?.infos?[indexPath.row] else {
-			return UITableViewCell()
-		}
 		
-		let thumbnailPhotoUrl = photo.getUrlForPhoto(size: .thumbnail)
-		cell.imageView?.loadImage(url: thumbnailPhotoUrl!)
-		cell.textLabel?.text = photo.title
+		if !isLoadingCell(for: indexPath) {
+			let photo = viewModel.flickrPhotoInfos[indexPath.row]
+			
+			let thumbnailPhotoUrl = photo.getUrlForPhoto(size: .thumbnail)
+			cell.imageView?.loadImage(url: thumbnailPhotoUrl!)
+			cell.textLabel?.text = photo.title
+		}
+		else {
+			cell.imageView?.image = UIImage(named: "default")
+			cell.textLabel?.text = "loading..."
+		}
 		return cell
 	}
 	
 	func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-		guard let photo = viewModel.flickrResponse?.infos?[indexPath.row] else {
-			return
-		}
+		let photo = viewModel.flickrPhotoInfos[indexPath.row]
 		let id = photo.id
 		self.delegate?.cellSelected(photoId: id)
+	}
+	
+	func tableView(_ tableView: UITableView, prefetchRowsAt indexPaths: [IndexPath]) {
+		if indexPaths.contains(where: isLoadingCell) {
+			viewModel.fetchData()
+		}
+	}
+}
+
+extension PhotoListViewController {
+	func isLoadingCell(for indexPath: IndexPath) -> Bool {
+		return indexPath.row >= viewModel.currentCount
+	}
+	
+	func visibleIndexPathsToReload(intersecting indexPaths: [IndexPath]) -> [IndexPath] {
+		let indexPathsForVisibleRows = tableView.indexPathsForVisibleRows ?? []
+		let indexPathsIntersection = Set(indexPathsForVisibleRows).intersection(indexPaths)
+		return Array(indexPathsIntersection)
 	}
 }
 

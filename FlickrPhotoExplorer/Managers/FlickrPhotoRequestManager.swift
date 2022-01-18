@@ -16,13 +16,15 @@ public enum RequestMethod: String {
 class FlickrPhotoRequestManager {
 	static let shared = FlickrPhotoRequestManager()
 	
-	func fetchPhotosWithTags(tags: [String], completion: @escaping (_ success: Bool, _ response: [String:Any]?) -> ()) {
+	func fetchPhotosWithTags(tags: [String], page: Int, completion: @escaping (_ success: Bool, _ response: [String:Any]?) -> ()) {
 		var urlComponents = URLComponents(string: Constants.BASE_URL + Constants.SERVICES_REST)!
 		let commaSeparatedTags = tags.joined(separator: ",")
 		let queryItems = [
 			URLQueryItem(name: "method", value: Constants.SEARCH),
 			URLQueryItem(name: "api_key", value: Constants.API_KEY),
 			URLQueryItem(name: "tags", value: commaSeparatedTags),
+			URLQueryItem(name: "per_page", value: String(25)),
+			URLQueryItem(name: "page", value: String(page)),
 			URLQueryItem(name: "format", value: "json"),
 			URLQueryItem(name: "nojsoncallback", value: "1"),
 		]
