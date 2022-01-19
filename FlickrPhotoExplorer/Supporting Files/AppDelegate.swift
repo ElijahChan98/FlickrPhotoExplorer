@@ -7,6 +7,7 @@
 
 import UIKit
 import CoreData
+import Firebase
 
 @main
 class AppDelegate: UIResponder, UIApplicationDelegate {
@@ -15,6 +16,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 	var photoSearchCoordinator: PhotoSearchCoordinator?
 
 	func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
+		FirebaseApp.configure()
 		self.window = UIWindow(frame: UIScreen.main.bounds)
 		
 		let navController = UINavigationController()
@@ -24,30 +26,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 		self.window?.rootViewController = navController
 		self.window?.makeKeyAndVisible()
 		return true
-	}
-	
-	lazy var persistentContainer: NSPersistentContainer = {
-		let container = NSPersistentContainer(name: "FlickrPhotoCoreData")
-		container.loadPersistentStores(completionHandler: { (storeDescription, error) in
-			if let error = error as NSError? {
-				fatalError("Unresolved error \(error), \(error.userInfo)")
-			}
-		})
-		return container
-	}()
-	
-	// MARK: - Core Data Saving support
-	
-	func saveContext () {
-		let context = persistentContainer.viewContext
-		if context.hasChanges {
-			do {
-				try context.save()
-			} catch {
-				let nserror = error as NSError
-				fatalError("Unresolved error \(nserror), \(nserror.userInfo)")
-			}
-		}
 	}
 
 	// MARK: UISceneSession Lifecycle

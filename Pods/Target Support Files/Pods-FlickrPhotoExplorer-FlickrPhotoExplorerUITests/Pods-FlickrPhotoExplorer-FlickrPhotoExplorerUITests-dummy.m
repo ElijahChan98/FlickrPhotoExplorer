@@ -1,0 +1,5 @@
+#import <Foundation/Foundation.h>
+@interface PodsDummy_Pods_FlickrPhotoExplorer_FlickrPhotoExplorerUITests : NSObject
+@end
+@implementation PodsDummy_Pods_FlickrPhotoExplorer_FlickrPhotoExplorerUITests
+@end
