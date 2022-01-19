@@ -21,6 +21,8 @@ class PhotoDetailsViewController: UIViewController, PhotoDetailsViewModelDelegat
 	@IBOutlet weak var descLabel: UILabel!
 	@IBOutlet weak var locationLabel: UILabel!
 	
+	@IBOutlet weak var loadingSpinner: UIActivityIndicatorView!
+	
 	private var favoriteButton: UIBarButtonItem!
 	private var state: ButtonState!
 	private var buttonImage: UIImage {
@@ -35,6 +37,7 @@ class PhotoDetailsViewController: UIViewController, PhotoDetailsViewModelDelegat
 	}
 	
 	var viewModel: PhotoDetailsViewModel!
+	var coordinatorDelegate: PhotoDetailsDelegate?
 	
 	init(viewModel: PhotoDetailsViewModel){
 		self.viewModel = viewModel
@@ -49,11 +52,12 @@ class PhotoDetailsViewController: UIViewController, PhotoDetailsViewModelDelegat
         super.viewDidLoad()
 		self.hideBackButtonText()
 		setupFavoriteButton()
-		LoadingAlertIndicator.showLoadingAlertIndicator()
+		self.loadingSpinner.startAnimating()
+		
     }
 	
 	func reloadData() {
-		LoadingAlertIndicator.hideLoadingAlertIndicator()
+		self.loadingSpinner.stopAnimating()
 		let photoDetails = viewModel.photoDetails
 		
 		if let photoTitle = photoDetails?.title.content {
@@ -110,4 +114,12 @@ class PhotoDetailsViewController: UIViewController, PhotoDetailsViewModelDelegat
 			}
 		}
 	}
+	
+	func showErrorAlert(error: FlickrError) {
+		self.coordinatorDelegate?.showErrorMessage(error: error)
+	}
+}
+
+protocol PhotoDetailsDelegate {
+	func showErrorMessage(error: FlickrError?)
 }

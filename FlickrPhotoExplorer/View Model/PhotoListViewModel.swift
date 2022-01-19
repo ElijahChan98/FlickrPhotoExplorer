@@ -119,7 +119,7 @@ class PhotoListViewModel {
 		}
 	}
 	
-	func indexPathsToReload(newPhotoInfos: [FlickrPhotoInfo]) -> [IndexPath] {
+	private func indexPathsToReload(newPhotoInfos: [FlickrPhotoInfo]) -> [IndexPath] {
 		let startIndex = flickrPhotoInfos.count - newPhotoInfos.count
 		let endIndex = startIndex + newPhotoInfos.count
 		let indexPaths = (startIndex..<endIndex).map {

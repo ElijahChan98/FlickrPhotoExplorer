@@ -8,7 +8,7 @@
 import Foundation
 import UIKit
 
-class PhotoDetailsCoordinator: Coordinator {
+class PhotoDetailsCoordinator: Coordinator, PhotoDetailsDelegate {
 	var childCoordinators = [Coordinator]()
 	var navigationController: UINavigationController
 	var viewModel: PhotoDetailsViewModel!
@@ -21,7 +21,16 @@ class PhotoDetailsCoordinator: Coordinator {
 	func start() {
 		let vc = PhotoDetailsViewController(viewModel: self.viewModel)
 		self.viewModel.delegate = vc
+		vc.coordinatorDelegate = self
 		self.navigationController.pushViewController(vc, animated: true)
+	}
+	
+	func showErrorMessage(error: FlickrError?) {
+		let message = error?.message ?? Constants.SOMETHING_WENT_WRONG
+		Utilities.showGenericOkAlert(title: nil, message: message) { _ in
+			self.navigationController.popViewController(animated: true)
+			self.childDidFinish(self)
+		}
 	}
 	
 	func childDidFinish(_ child: Coordinator?) {

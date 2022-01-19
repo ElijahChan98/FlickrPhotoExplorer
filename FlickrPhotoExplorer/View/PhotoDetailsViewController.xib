@@ -15,6 +15,7 @@
                 <outlet property="containingStackView" destination="1HA-tR-cgF" id="9Ph-R2-J0C"/>
                 <outlet property="descLabel" destination="Qpm-Yj-HpH" id="mBq-Vg-ugV"/>
                 <outlet property="imageView" destination="V5Y-Xf-cuN" id="u4S-RT-o6y"/>
+                <outlet property="loadingSpinner" destination="oxV-la-zqU" id="ZPr-7o-rBi"/>
                 <outlet property="locationLabel" destination="dcO-C9-4vV" id="utJ-aX-9BX"/>
                 <outlet property="titleLabel" destination="WUp-zT-bGf" id="8oi-8b-EnX"/>
                 <outlet property="view" destination="i5M-Pr-FkT" id="sfx-zR-JGt"/>
@@ -29,7 +30,7 @@
                     <rect key="frame" x="0.0" y="44" width="414" height="818"/>
                     <subviews>
                         <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" spacing="10" translatesAutoresizingMaskIntoConstraints="NO" id="UJQ-W3-cLZ">
-                            <rect key="frame" x="0.0" y="0.0" width="414" height="506"/>
+                            <rect key="frame" x="0.0" y="0.0" width="414" height="553"/>
                             <subviews>
                                 <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="redraw" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="V5Y-Xf-cuN">
                                     <rect key="frame" x="0.0" y="0.0" width="414" height="400"/>
@@ -37,8 +38,11 @@
                                         <constraint firstAttribute="height" constant="400" id="rbJ-JX-hsS"/>
                                     </constraints>
                                 </imageView>
+                                <activityIndicatorView opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" hidesWhenStopped="YES" animating="YES" style="large" translatesAutoresizingMaskIntoConstraints="NO" id="oxV-la-zqU">
+                                    <rect key="frame" x="0.0" y="410" width="414" height="37"/>
+                                </activityIndicatorView>
                                 <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" spacing="10" translatesAutoresizingMaskIntoConstraints="NO" id="1HA-tR-cgF">
-                                    <rect key="frame" x="0.0" y="410" width="414" height="96"/>
+                                    <rect key="frame" x="0.0" y="457" width="414" height="96"/>
                                     <subviews>
                                         <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="" textAlignment="center" lineBreakMode="tailTruncation" numberOfLines="2" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="WUp-zT-bGf">
                                             <rect key="frame" x="10" y="8" width="394" height="0.0"/>

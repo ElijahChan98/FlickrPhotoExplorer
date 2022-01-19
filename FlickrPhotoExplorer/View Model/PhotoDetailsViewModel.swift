@@ -29,7 +29,7 @@ class PhotoDetailsViewModel {
 				}
 			case .failure(let error):
 				if let error = error {
-					
+					self.delegate?.showErrorAlert(error: error)
 				}
 			}
 			
@@ -70,5 +70,6 @@ class PhotoDetailsViewModel {
 }
 
 protocol PhotoDetailsViewModelDelegate: AnyObject {
+	func showErrorAlert(error: FlickrError)
 	func reloadData()
 }
