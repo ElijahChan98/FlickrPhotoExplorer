@@ -20,4 +20,5 @@ struct Constants {
 	static let API_KEY = "2d89ac8b7adc5765b12658a928786b54"
 	
 	static let SOMETHING_WENT_WRONG = "Something went wrong, please try again later."
+	static let NO_RESULT = "No results found"
 }

@@ -18,7 +18,6 @@ class PhotoListViewModel {
 	var delegate: PhotoListViewModelDelegate?
 	
 	private var hasExistingData: Bool!
-	
 	private var isFetchInProgress: Bool = false
 	
 	private var flickrResponse: FlickrResponse?
@@ -52,8 +51,10 @@ class PhotoListViewModel {
 			self.fetchExistingData()
 		}
 		else {
-			self.delegate?.showLoadingAlert()
-			self.fetchAPIData()
+			if self.currentPage == 1 {
+				self.delegate?.showLoadingAlert()
+				self.fetchAPIData()
+			}
 		}
 	}
 	
@@ -107,6 +108,11 @@ class PhotoListViewModel {
 					self.delegate?.reloadData(.success(indexPathsToReload))
 				}
 				else {
+					guard self.flickrPhotoInfos.count != 0 else {
+						let error = FlickrError(message: Constants.NO_RESULT, code: 999, stat: "fail")
+						self.delegate?.showErrorAlert(error: error)
+						return
+					}
 					self.delegate?.reloadData(.success(.none))
 				}
 			}
@@ -125,5 +131,6 @@ class PhotoListViewModel {
 
 protocol PhotoListViewModelDelegate {
 	func showLoadingAlert()
+	func showErrorAlert(error: FlickrError)
 	func reloadData(_ reloadResult: ReloadResult<Any>)
 }

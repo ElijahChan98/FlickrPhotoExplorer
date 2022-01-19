@@ -52,37 +52,20 @@ class PhotoDetailsViewController: UIViewController, PhotoDetailsViewModelDelegat
 		LoadingAlertIndicator.showLoadingAlertIndicator()
     }
 	
-	func setupFavoriteButton() {
-		if viewModel.imageInfoExists() {
-			self.state = .favorite
-		}
-		else {
-			self.state = .unfavorite
-		}
-		self.favoriteButton = UIBarButtonItem(image: buttonImage, style: .plain, target: self, action: #selector(addToFavorites))
-		navigationItem.rightBarButtonItem = self.favoriteButton
-	}
-	
-	@objc func addToFavorites() {
-		switch state {
-		case .favorite:
-			self.state = .unfavorite
-			viewModel.deleteImageInfo()
-		case .unfavorite, .none:
-			self.state = .favorite
-			viewModel.saveImageInfo()
-		}
-		navigationItem.rightBarButtonItem?.image = buttonImage
-	}
-	
 	func reloadData() {
 		LoadingAlertIndicator.hideLoadingAlertIndicator()
 		let photoDetails = viewModel.photoDetails
 		
-		self.titleLabel.text = photoDetails?.title.content
+		if let photoTitle = photoDetails?.title.content {
+			var title = photoTitle
+			if title == "" {
+				title = "Untitled"
+			}
+			self.titleLabel.text = title
+		}
 		self.authorLabel.text = "By: \(photoDetails?.owner.username ?? "unknown")"
 		self.descLabel.text = photoDetails?.description.content
-		if let location = photoDetails?.owner.location {
+		if let location = photoDetails?.owner.location, location != "" {
 			self.locationLabel.text = "Location: \(location)"
 		}
 		
@@ -93,6 +76,29 @@ class PhotoDetailsViewController: UIViewController, PhotoDetailsViewModelDelegat
 		self.imageView.loadImage(url: url!)
 		
 		removeEmptyViews()
+	}
+	
+	func setupFavoriteButton() {
+		if viewModel.imageInfoExists() {
+			self.state = .favorite
+		}
+		else {
+			self.state = .unfavorite
+		}
+		self.favoriteButton = UIBarButtonItem(image: buttonImage, style: .plain, target: self, action: #selector(toggleFavorites))
+		navigationItem.rightBarButtonItem = self.favoriteButton
+	}
+	
+	@objc func toggleFavorites() {
+		switch state {
+		case .favorite:
+			self.state = .unfavorite
+			viewModel.deleteImageInfo()
+		case .unfavorite, .none:
+			self.state = .favorite
+			viewModel.saveImageInfo()
+		}
+		navigationItem.rightBarButtonItem?.image = buttonImage
 	}
 	
 	func removeEmptyViews() {

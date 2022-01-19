@@ -18,7 +18,7 @@ struct PhotoDescription: Codable {
 	enum CodingKeys: String, CodingKey {
 		case content = "_content"
 	}
-	var content: String
+	var content: String?
 }
 
 struct Dates: Codable {
@@ -28,9 +28,9 @@ struct Dates: Codable {
 		case lastUpdate = "lastupdate"
 	}
 	
-	var posted: String
-	var taken: String
-	var lastUpdate: String
+	var posted: String?
+	var taken: String?
+	var lastUpdate: String?
 	
 	static func readableValue(_ unixValue: String) -> String {
 		guard let unixValueDouble = Double(unixValue) else {

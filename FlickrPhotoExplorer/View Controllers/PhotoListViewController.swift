@@ -11,7 +11,10 @@ class PhotoListViewController: UIViewController, PhotoListViewModelDelegate {
 	@IBOutlet weak var tableView: UITableView!
 	
 	private var viewModel: PhotoListViewModel!
-	var delegate: PhotoListDelegate?
+	var coordinatorDelegate: PhotoListDelegate?
+	
+	var loadingSpinner: UIActivityIndicatorView!
+	var loadingItem: UIBarButtonItem!
 	
 	init(viewModel: PhotoListViewModel) {
 		self.viewModel = viewModel
@@ -25,6 +28,7 @@ class PhotoListViewController: UIViewController, PhotoListViewModelDelegate {
     override func viewDidLoad() {
         super.viewDidLoad()
 		self.hideBackButtonText()
+		self.setupLoadingSpinner()
 		
 		self.title = viewModel.title
 		self.tableView.delegate = self
@@ -35,28 +39,44 @@ class PhotoListViewController: UIViewController, PhotoListViewModelDelegate {
 		self.viewModel.delegate = self
     }
 	
+	
 	override func viewWillAppear(_ animated: Bool) {
 		self.viewModel.fetchData()
 	}
 	
 	func reloadData(_ reloadResult: ReloadResult<Any>) {
-		LoadingAlertIndicator.hideLoadingAlertIndicator()
+		self.loadingSpinner.stopAnimating()
 		switch reloadResult {
 		case .success(let indexPathsToReload):
 			guard let indexPathsToReload = indexPathsToReload else {
 				self.tableView.reloadData()
 				return
 			}
-			
+
 			let newIndexPathsToReload = self.visibleIndexPathsToReload(intersecting: indexPathsToReload)
 			self.tableView.reloadRows(at: newIndexPathsToReload, with: .automatic)
 		case .failure(let error):
-			self.delegate?.showErrorMessage(error: error)
+			self.coordinatorDelegate?.showErrorMessage(error: error)
 		}
 	}
 	
 	func showLoadingAlert() {
-		LoadingAlertIndicator.showLoadingAlertIndicator()
+		self.loadingSpinner.startAnimating()
+	}
+	
+	func showErrorAlert(error: FlickrError) {
+		self.coordinatorDelegate?.showErrorMessage(error: error)
+	}
+	
+	func setupLoadingSpinner() {
+		if #available(iOS 13.0, *) {
+			self.loadingSpinner = UIActivityIndicatorView(style: .medium)
+		} else {
+			self.loadingSpinner = UIActivityIndicatorView(style: .white)
+		}
+		self.loadingSpinner.hidesWhenStopped = true
+		self.loadingItem = UIBarButtonItem(customView: self.loadingSpinner)
+		navigationItem.rightBarButtonItem = self.loadingItem
 	}
 	
 }
@@ -73,8 +93,14 @@ extension PhotoListViewController: UITableViewDelegate, UITableViewDataSource, U
 			let photo = viewModel.flickrPhotoInfos[indexPath.row]
 			
 			let thumbnailPhotoUrl = photo.getUrlForPhoto(size: .thumbnail)
+			
+			var title = photo.title
+			if title == "" {
+				title = "Untitled"
+			}
+			cell.textLabel?.text = title
 			cell.imageView?.loadImage(url: thumbnailPhotoUrl!)
-			cell.textLabel?.text = photo.title
+			
 		}
 		else {
 			cell.imageView?.image = UIImage(named: "default")
@@ -86,7 +112,7 @@ extension PhotoListViewController: UITableViewDelegate, UITableViewDataSource, U
 	func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
 		let photo = viewModel.flickrPhotoInfos[indexPath.row]
 		let id = photo.id
-		self.delegate?.cellSelected(photoId: id)
+		self.coordinatorDelegate?.cellSelected(photoId: id)
 	}
 	
 	func tableView(_ tableView: UITableView, prefetchRowsAt indexPaths: [IndexPath]) {

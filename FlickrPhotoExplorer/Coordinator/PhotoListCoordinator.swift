@@ -24,7 +24,7 @@ class PhotoListCoordinator: Coordinator, PhotoListDelegate {
 	
 	func start() {
 		let vc = PhotoListViewController(viewModel: viewModel)
-		vc.delegate = self
+		vc.coordinatorDelegate = self
 		self.navigationController.pushViewController(vc, animated: true)
 	}
 	
@@ -44,13 +44,9 @@ class PhotoListCoordinator: Coordinator, PhotoListDelegate {
 	
 	func showErrorMessage(error: FlickrError?) {
 		let message = error?.message ?? Constants.SOMETHING_WENT_WRONG
-		let okAlert = UIAlertController(title: "", message: message, preferredStyle: .alert)
-		let okAction = UIAlertAction(title: "Okay", style: .default) { alert in
+		Utilities.showGenericOkAlert(title: nil, message: message) { _ in
 			self.navigationController.popViewController(animated: true)
 			self.childDidFinish(self)
 		}
-		okAlert.addAction(okAction)
-		
-		self.navigationController.present(okAlert, animated: true, completion: nil)
 	}
 }
