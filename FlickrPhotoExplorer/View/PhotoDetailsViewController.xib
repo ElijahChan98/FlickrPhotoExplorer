@@ -4,6 +4,7 @@
     <dependencies>
         <deployment identifier="iOS"/>
         <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="19519"/>
+        <capability name="Named colors" minToolsVersion="9.0"/>
         <capability name="Safe area layout guides" minToolsVersion="9.0"/>
         <capability name="System colors in document resources" minToolsVersion="11.0"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
@@ -14,6 +15,7 @@
                 <outlet property="authorLabel" destination="LES-gc-51N" id="nUJ-Eo-Nnv"/>
                 <outlet property="containingStackView" destination="1HA-tR-cgF" id="9Ph-R2-J0C"/>
                 <outlet property="descLabel" destination="Qpm-Yj-HpH" id="mBq-Vg-ugV"/>
+                <outlet property="imageHeightConstraint" destination="rbJ-JX-hsS" id="ehj-4I-lH8"/>
                 <outlet property="imageView" destination="V5Y-Xf-cuN" id="u4S-RT-o6y"/>
                 <outlet property="loadingSpinner" destination="oxV-la-zqU" id="ZPr-7o-rBi"/>
                 <outlet property="locationLabel" destination="dcO-C9-4vV" id="utJ-aX-9BX"/>
@@ -30,19 +32,19 @@
                     <rect key="frame" x="0.0" y="44" width="414" height="818"/>
                     <subviews>
                         <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" spacing="10" translatesAutoresizingMaskIntoConstraints="NO" id="UJQ-W3-cLZ">
-                            <rect key="frame" x="0.0" y="0.0" width="414" height="553"/>
+                            <rect key="frame" x="0.0" y="0.0" width="414" height="153"/>
                             <subviews>
                                 <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="redraw" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="V5Y-Xf-cuN">
-                                    <rect key="frame" x="0.0" y="0.0" width="414" height="400"/>
+                                    <rect key="frame" x="0.0" y="0.0" width="414" height="0.0"/>
                                     <constraints>
-                                        <constraint firstAttribute="height" constant="400" id="rbJ-JX-hsS"/>
+                                        <constraint firstAttribute="height" id="rbJ-JX-hsS"/>
                                     </constraints>
                                 </imageView>
                                 <activityIndicatorView opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" hidesWhenStopped="YES" animating="YES" style="large" translatesAutoresizingMaskIntoConstraints="NO" id="oxV-la-zqU">
-                                    <rect key="frame" x="0.0" y="410" width="414" height="37"/>
+                                    <rect key="frame" x="0.0" y="10" width="414" height="37"/>
                                 </activityIndicatorView>
                                 <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" spacing="10" translatesAutoresizingMaskIntoConstraints="NO" id="1HA-tR-cgF">
-                                    <rect key="frame" x="0.0" y="457" width="414" height="96"/>
+                                    <rect key="frame" x="0.0" y="57" width="414" height="96"/>
                                     <subviews>
                                         <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="" textAlignment="center" lineBreakMode="tailTruncation" numberOfLines="2" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="WUp-zT-bGf">
                                             <rect key="frame" x="10" y="8" width="394" height="0.0"/>
@@ -53,7 +55,7 @@
                                         <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="LES-gc-51N">
                                             <rect key="frame" x="10" y="18" width="394" height="50"/>
                                             <fontDescription key="fontDescription" style="UICTFontTextStyleSubhead"/>
-                                            <nil key="textColor"/>
+                                            <color key="textColor" name="AccentColor"/>
                                             <nil key="highlightedColor"/>
                                         </label>
                                         <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="" textAlignment="natural" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Qpm-Yj-HpH">
@@ -95,6 +97,9 @@
         </view>
     </objects>
     <resources>
+        <namedColor name="AccentColor">
+            <color red="0.0" green="0.46000000000000002" blue="0.89000000000000001" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+        </namedColor>
         <systemColor name="systemBackgroundColor">
             <color white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
         </systemColor>

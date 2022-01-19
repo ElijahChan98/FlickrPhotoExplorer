@@ -14,7 +14,7 @@ public enum ReloadResult<T> {
 
 class PhotoListViewModel {
 	var title: String!
-	var searchTags: [String]!
+	var searchText: String!
 	var delegate: PhotoListViewModelDelegate?
 	
 	private var hasExistingData: Bool!
@@ -29,15 +29,14 @@ class PhotoListViewModel {
 	}
 	var total = 0
 	
-	init(searchTags: [String]) {
-		let searchText = searchTags.joined(separator: ", ")
-		if searchText == "" {
-			self.title = "Recent Uploads"
-		}
-		else {
+	init(searchText: String?) {
+		if let searchText = searchText, searchText != "" {
 			self.title = "Search results for \(searchText)"
 		}
-		self.searchTags = searchTags
+		else {
+			self.title = "Recent Uploads"
+		}
+		self.searchText = searchText
 		self.hasExistingData = false
 	}
 	
@@ -66,11 +65,12 @@ class PhotoListViewModel {
 		}
 	}
 	
-	private func fetchAPIData() {
+	func fetchAPIData() {
 		guard isFetchInProgress == false else { return }
 		isFetchInProgress = true
 		
-		FlickrPhotoRequestManager.shared.fetchPhotosWithTags(tags: searchTags, page: self.currentPage) { result in
+		print("fetching...")
+		FlickrPhotoRequestManager.shared.fetchPhotosWithKeyword(keyword: searchText, page: self.currentPage) { result in
 			DispatchQueue.main.async {
 				switch result {
 				case .success(let response):
@@ -80,6 +80,8 @@ class PhotoListViewModel {
 					}
 					self.currentPage += 1
 					self.isFetchInProgress = false
+					
+					print("page: \(self.currentPage)")
 					
 					self.getFlickrPhotoDetailsFromResponse(response)
 				case .failure(let error):

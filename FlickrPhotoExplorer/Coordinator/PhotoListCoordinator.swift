@@ -12,8 +12,8 @@ class PhotoListCoordinator: Coordinator, PhotoListDelegate {
 	var navigationController: UINavigationController
 	private var viewModel: PhotoListViewModel!
 	
-	init(navigationController: UINavigationController, searchTags: [String]) {
-		self.viewModel = PhotoListViewModel(searchTags: searchTags)
+	init(navigationController: UINavigationController, searchText: String?) {
+		self.viewModel = PhotoListViewModel(searchText: searchText)
 		self.navigationController = navigationController
 	}
 	

@@ -20,6 +20,7 @@ class PhotoDetailsViewController: UIViewController, PhotoDetailsViewModelDelegat
 	@IBOutlet weak var authorLabel: UILabel!
 	@IBOutlet weak var descLabel: UILabel!
 	@IBOutlet weak var locationLabel: UILabel!
+	@IBOutlet weak var imageHeightConstraint: NSLayoutConstraint!
 	
 	@IBOutlet weak var loadingSpinner: UIActivityIndicatorView!
 	
@@ -55,6 +56,10 @@ class PhotoDetailsViewController: UIViewController, PhotoDetailsViewModelDelegat
 		self.loadingSpinner.startAnimating()
 		
     }
+	
+	override func viewWillLayoutSubviews() {
+		self.imageHeightConstraint.constant = UIScreen.main.bounds.width
+	}
 	
 	func reloadData() {
 		self.loadingSpinner.stopAnimating()

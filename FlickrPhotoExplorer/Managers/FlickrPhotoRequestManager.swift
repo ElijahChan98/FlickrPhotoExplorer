@@ -21,7 +21,7 @@ public enum FlickrResult<T> {
 class FlickrPhotoRequestManager {
 	static let shared = FlickrPhotoRequestManager()
 	
-	func fetchPhotosWithTags(tags: [String], page: Int, completion: @escaping (FlickrResult<Any>) -> ()) {
+	func fetchPhotosWithKeyword(keyword: String, page: Int, completion: @escaping (FlickrResult<Any>) -> ()) {
 		var urlComponents = URLComponents(string: Constants.BASE_URL + Constants.SERVICES_REST)!
 		var queryItems = [
 			URLQueryItem(name: "api_key", value: Constants.API_KEY),
@@ -29,11 +29,10 @@ class FlickrPhotoRequestManager {
 			URLQueryItem(name: "format", value: "json"),
 			URLQueryItem(name: "nojsoncallback", value: "1"),
 		]
-		let commaSeparatedTags = tags.joined(separator: ",")
-		if commaSeparatedTags != "" {
-			let commaSeparatedTags = tags.joined(separator: ",")
+		
+		if keyword != "" {
 			queryItems.append(URLQueryItem(name: "method", value: Constants.SEARCH))
-			queryItems.append(URLQueryItem(name: "tags", value: commaSeparatedTags))
+			queryItems.append(URLQueryItem(name: "text", value: keyword))
 		}
 		else {
 			queryItems.append(URLQueryItem(name: "method", value: Constants.GET_RECENT))

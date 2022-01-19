@@ -30,8 +30,8 @@ class PhotoSearchCoordinator: Coordinator, PhotoSearchDelegate {
 		}
 	}
 	
-	func search(tags: [String]) {
-		let photoListCoordinator = PhotoListCoordinator(navigationController: self.navigationController, searchTags: tags)
+	func search(searchText: String?) {
+		let photoListCoordinator = PhotoListCoordinator(navigationController: self.navigationController, searchText: searchText)
 		photoListCoordinator.start()
 	}
 	

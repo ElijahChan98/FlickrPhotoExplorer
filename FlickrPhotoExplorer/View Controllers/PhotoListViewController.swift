@@ -89,9 +89,9 @@ extension PhotoListViewController: UITableViewDelegate, UITableViewDataSource, U
 	func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
 		let cell = tableView.dequeueReusableCell(withIdentifier: "cell", for: indexPath)
 		
+		
 		if !isLoadingCell(for: indexPath) {
 			let photo = viewModel.flickrPhotoInfos[indexPath.row]
-			
 			let thumbnailPhotoUrl = photo.getUrlForPhoto(size: .thumbnail)
 			
 			var title = photo.title
@@ -103,13 +103,16 @@ extension PhotoListViewController: UITableViewDelegate, UITableViewDataSource, U
 			
 		}
 		else {
-			cell.imageView?.image = UIImage(named: "default")
 			cell.textLabel?.text = "loading..."
 		}
 		return cell
 	}
 	
+	
 	func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+		guard !isLoadingCell(for: indexPath) else {
+			return
+		}
 		let photo = viewModel.flickrPhotoInfos[indexPath.row]
 		let id = photo.id
 		self.coordinatorDelegate?.cellSelected(photoId: id)
@@ -117,7 +120,7 @@ extension PhotoListViewController: UITableViewDelegate, UITableViewDataSource, U
 	
 	func tableView(_ tableView: UITableView, prefetchRowsAt indexPaths: [IndexPath]) {
 		if indexPaths.contains(where: isLoadingCell) {
-			viewModel.fetchData()
+			viewModel.fetchAPIData()
 		}
 	}
 }

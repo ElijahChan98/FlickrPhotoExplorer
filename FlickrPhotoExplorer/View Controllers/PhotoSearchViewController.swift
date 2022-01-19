@@ -28,11 +28,10 @@ class PhotoSearchViewController: UIViewController {
 
 	@IBAction func onSearchButtonClick(_ sender: Any) {
 		if let searchText = searchTextField.text {
-			let tags = searchText.components(separatedBy: " ")
-			self.delegate?.search(tags: tags)
+			self.delegate?.search(searchText: searchText)
 		}
 		else {
-			self.delegate?.search(tags: [])
+			self.delegate?.search(searchText: nil)
 		}
 	}
 	
@@ -42,6 +41,6 @@ class PhotoSearchViewController: UIViewController {
 }
 
 protocol PhotoSearchDelegate: AnyObject {
-	func search(tags: [String])
+	func search(searchText: String?)
 	func openFavorites()
 }
