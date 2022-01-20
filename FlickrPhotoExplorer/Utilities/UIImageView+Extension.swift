@@ -27,6 +27,7 @@ extension UIImageView {
 		
 		if let imageFromCache = imageCache.object(forKey: url as AnyObject) {
 			image = imageFromCache as? UIImage
+			activityIndicator.stopAnimating()
 			return
 		}
 		ImageDownloader.downloadImage(url: url) { [weak self] result in
